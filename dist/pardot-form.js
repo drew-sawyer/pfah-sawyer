@@ -1,9 +1,7 @@
 /****************************************************
-*  project: pardot form ajax handler                *
-*  description: main script                         *
-*  author: horans@gmail.com                         *
+*  original author: horans@gmail.com                *
 *  url: github.com/horans/pardot-form-ajax-handler  *
-*  update: 210311                                   *
+*  modified for Sawyer                              *
 ****************************************************/
 
 /* global $ grecaptcha */
@@ -50,7 +48,9 @@ pfah.asset = function (type, asset) {
 pfah.remember = function () {
   $('.pfah-input').each(function () {
     if ($(this).closest('.pfah-wrapper').data('remember') !== 'no') {
-      $(this).val(window.localStorage.getItem('pfah-' + $(this).attr('name')))
+      if ($(this).attr('type') !== 'submit'){
+        $(this).val(window.localStorage.getItem('pfah-' + $(this).attr('name')))
+      }
     }
   })
 }
@@ -77,7 +77,7 @@ pfah.init = function () {
       }
       // check form link
       var p = $(this).find('.pfah-form').attr('action')
-      if (p.indexOf('go.pardot.com') < 0) {
+      if (p.indexOf('go.hisawyer.com') < 0) {
         $(this).trigger('pfah.notpardot')
           .find('[type="submit"]').attr('disabled', 'disabled')
         window.console.log('[pfah] not a pardot form')
@@ -136,7 +136,7 @@ pfah.popup = function (tar) {
 $(function () {
   // initialize
   pfah.init()
-
+  pageLoadedTime = new Date(performance.timing.domContentLoadedEventEnd);
   // submit form
   $('body').on('submit', '.pfah-wrapper', function (e) {
     e.preventDefault()
@@ -152,17 +152,57 @@ $(function () {
         pfah.callback({ result: 'error' })
       } else {
         pfah.form.load = true
-        var f = $(this).find('.pfah-form')
-        f.find('[type="submit"]').attr('disabled', 'disabled')
-        window.console.log('[pfah] form submit')
-        $(this).trigger('pfah.submit', pfah.form.id)
-        // stackoverflow.com/questions/47047487/
-        $.ajax({
-          url: f.attr('action'),
-          method: 'POST',
-          data: f.serialize(),
-          dataType: 'jsonp'
-        })
+        var f = $(this).find('.pfah-form');
+        var formEl = $(this).children('form')[0];
+        var submitBtn = $(f).find('input[type="submit"]');
+        var btnLoadtext = $(submitBtn).attr('data-wait');
+        // Change button text to loading text on submit
+        $(submitBtn).val(btnLoadtext);
+        const timeEnd = new Date();
+        const timeDiff = timeEnd - pageLoadedTime;
+        if (timeDiff >= 1000) {
+            Cookies.remove("is_potential_bot", { domain: "hisawyer.com" });
+        } else {
+            Cookies.set("is_potential_bot", true, { domain: "hisawyer.com", expires: 365 });
+        }
+        // check h0neyp0t field
+        var x = $(f).find('.pardot_extra_field').val();
+        var formValid = formEl.checkValidity();
+        // check email for blocked domains
+        const domains = ["putrajayabaya.skom.id", "rhyta.com", "skom.id", "uma3.be", "jmlocal.com", "gml.com", "gojek.com", "upseotop.com", "mailinator.com", "genin88.com"];
+        const regex = new RegExp(/\.id$/);
+        const rejectDomain = domains.some(function(domain) {
+          const userInputtedEmail = $(f).find('input[name="Email"').val();
+          const reject1 = userInputtedEmail.includes(domain);
+          const reject2 = regex.test(userInputtedEmail);
+          return reject1 || reject2;
+        });
+        if (rejectDomain) {
+          // Block invalid domains and set b0t cookie
+          Cookies.set("is_potential_bot", true, { domain: "hisawyer.com", expires: 365 });
+          pfah.callback({ result: 'error' });
+          return false;
+          // Submit form if valid and no h0neyp0t
+        } else if (x == "" || x == null) {
+            if ( formValid ) {
+            $(f).find('[type="submit"]').attr('disabled', 'disabled')
+            window.console.log('[pfah] form submit')
+            $(this).trigger('pfah.submit', pfah.form.id)
+            // stackoverflow.com/questions/47047487/
+            $.ajax({
+              url: f.attr('action'),
+              method: 'POST',
+              data: f.serialize(),
+              dataType: 'jsonp'
+            });
+          } else {
+            pfah.callback({ result: 'error' });
+          }
+        } else {
+          Cookies.set("is_potential_bot", true, { domain: "hisawyer.com", expires: 365 });
+          pfah.callback({ result: 'error' });
+          return false;
+        }
       }
     }
   })
