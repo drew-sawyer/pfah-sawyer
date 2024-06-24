@@ -170,7 +170,7 @@ $(function () {
         var x = $(f).find('.pardot_extra_field').val();
         var y = $(f).find('.utm_extra').val();
         var usour = $(f).find('.utm_source').val();
-        var ahid = $(f).find('.ahoy-visit-id').val();
+        var gid = $(f).find('.gclid').val();
         var formValid = formEl.checkValidity();
         // check email for blocked domains
         const domains = ["putrajayabaya.skom.id", "rhyta.com", "skom.id", "uma3.be", "jmlocal.com", "gml.com", "gojek.com", "upseotop.com", "mailinator.com", "genin88.com"];
@@ -185,9 +185,9 @@ $(function () {
           return (value == null || (typeof value === "string" && value.trim().length === 0));
         }
         // Check if AhoyID matches utm_source or if domain is blocked
-        if (((isEmpty(ahid) == false) && (ahid === usour )) || (rejectDomain)) {
+        if (((isEmpty(gid) == false) && (gid === usour )) || (rejectDomain)) {
           // Block invalid domains and set b0t cookie
-          console.log(ahid);
+          console.log(gid);
           console.log(usour);
           Cookies.set("is_potential_bot", true, { domain: "hisawyer.com", expires: 365 });
           return false;
