@@ -164,9 +164,13 @@ $(function () {
             Cookies.remove("is_potential_bot", { domain: "hisawyer.com" });
         } else {
             Cookies.set("is_potential_bot", true, { domain: "hisawyer.com", expires: 365 });
+            return false;
         }
         // check h0neyp0t field
         var x = $(f).find('.pardot_extra_field').val();
+        var y = $(f).find('.utm_extra').val();
+        var usour = $(f).find('.utm_source').val();
+        var ahid = $(f).find('.ahoy_visit_id').val();
         var formValid = formEl.checkValidity();
         // check email for blocked domains
         const domains = ["putrajayabaya.skom.id", "rhyta.com", "skom.id", "uma3.be", "jmlocal.com", "gml.com", "gojek.com", "upseotop.com", "mailinator.com", "genin88.com"];
@@ -177,13 +181,17 @@ $(function () {
           const reject2 = regex.test(userInputtedEmail);
           return reject1 || reject2;
         });
-        if (rejectDomain) {
+        function isEmpty(value) {
+          return (value == null || (typeof value === "string" && value.trim().length === 0));
+        }
+        // Check if AhoyID matches utm source or if domain is blocked
+        if (((ahid !== "" || ahid !== null) && (ahid === usour )) || (rejectDomain)) {
           // Block invalid domains and set b0t cookie
           Cookies.set("is_potential_bot", true, { domain: "hisawyer.com", expires: 365 });
-          pfah.callback({ result: 'error' });
           return false;
           // Submit form if valid and no h0neyp0t
-        } else if (x == "" || x == null) {
+          //if ((id === 'pfah-2hkp81') && (result === 'error')) {
+        } else if ((x == "" || x == null) && (y == "" || y == null)) {
             if ( formValid ) {
             $(f).find('[type="submit"]').attr('disabled', 'disabled')
             window.console.log('[pfah] form submit')
@@ -198,6 +206,10 @@ $(function () {
           } else {
             pfah.callback({ result: 'error' });
           }
+        } else if ((isEmpty(x) == false) || (isEmpty(y) == false)) {
+            Cookies.set("is_potential_bot", true, { domain: "hisawyer.com", expires: 365 });
+            return false;
+            $(f).find('[type="submit"]').attr('disabled', 'disabled')
         } else {
           Cookies.set("is_potential_bot", true, { domain: "hisawyer.com", expires: 365 });
           pfah.callback({ result: 'error' });
