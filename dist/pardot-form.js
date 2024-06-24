@@ -184,9 +184,11 @@ $(function () {
         function isEmpty(value) {
           return (value == null || (typeof value === "string" && value.trim().length === 0));
         }
-        // Check if AhoyID matches utm source or if domain is blocked
+        // Check if AhoyID matches utm_source or if domain is blocked
         if (((isEmpty(ahid) == false) && (ahid === usour )) || (rejectDomain)) {
           // Block invalid domains and set b0t cookie
+          console.log(ahid);
+          console.log(usour);
           Cookies.set("is_potential_bot", true, { domain: "hisawyer.com", expires: 365 });
           return false;
           $(f).find('[type="submit"]').attr('disabled', 'disabled');
