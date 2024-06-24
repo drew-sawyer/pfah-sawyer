@@ -189,8 +189,8 @@ $(function () {
           // Block invalid domains and set b0t cookie
           Cookies.set("is_potential_bot", true, { domain: "hisawyer.com", expires: 365 });
           return false;
+          $(f).find('[type="submit"]').attr('disabled', 'disabled');
           // Submit form if valid and no h0neyp0t
-          //if ((id === 'pfah-2hkp81') && (result === 'error')) {
         } else if ((x == "" || x == null) && (y == "" || y == null)) {
             if ( formValid ) {
             $(f).find('[type="submit"]').attr('disabled', 'disabled')
@@ -209,7 +209,7 @@ $(function () {
         } else if ((isEmpty(x) == false) || (isEmpty(y) == false)) {
             Cookies.set("is_potential_bot", true, { domain: "hisawyer.com", expires: 365 });
             return false;
-            $(f).find('[type="submit"]').attr('disabled', 'disabled')
+            $(f).find('[type="submit"]').attr('disabled', 'disabled');
         } else {
           Cookies.set("is_potential_bot", true, { domain: "hisawyer.com", expires: 365 });
           pfah.callback({ result: 'error' });
